@@ -1,3 +1,51 @@
+# Environment variables
 .env
-_pycache__/
+.env.local
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs and databases
+*.log
+*.sqlite
+*.sqlite3
+*.db
+
+# OS specific
+Thumbs.db
 .DS_Store
