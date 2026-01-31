@@ -5,10 +5,11 @@ import pandas as pd
 
 # ----------------- STATE -----------------
 is_typing = False
+current_after_id = None
 
 # ----------------- LOAD CSV -----------------
 df = pd.read_csv(
-    "Database_Path",
+    "database/ListeningSession.csv",
     sep=None,
     engine="python",
     usecols=[1, 2]
@@ -24,37 +25,35 @@ music_dict = {
 def sys_loop(items, label, item_idx=0, char_idx=0):
     # Define the typewriter style print here
 
-    global is_typing
+    global is_typing, current_after_id
 
-    # This if-statement fails currently -> During printing
-    # the entry should be blocked but it is not.
-    
     if item_idx >= len(items):
         is_typing = False
-        entry.config(state="normal")
+        current_after_id = None
         entry.focus_set()
         return
 
     item = items[item_idx]
 
-
     # Grab the text from the database
-    
+
     if char_idx < len(item):
         label.config(text=label.cget("text") + item[char_idx])
         delay = random.randint(80, 160)
-        label.after(delay, sys_loop, items, label, item_idx, char_idx + 1)
+        current_after_id = label.after(delay, sys_loop, items, label, item_idx, char_idx + 1)
     else:
-        label.after(300, sys_loop, items, label, item_idx + 1, 0)
+        current_after_id = label.after(300, sys_loop, items, label, item_idx + 1, 0)
 
 # ----------------- INPUT HANDLER -----------------
 def add_new_text(event=None):
     # Enter sys_loop() and print the new value, when the key is entered
-    
-    global is_typing
 
-    if is_typing:
-        return
+    global is_typing, current_after_id
+
+    # Cancel any ongoing typewriter animation
+    if current_after_id is not None:
+        label.after_cancel(current_after_id)
+        current_after_id = None
 
     raw = entry.get().strip()
     if not raw:
@@ -63,11 +62,12 @@ def add_new_text(event=None):
     try:
         key = int(raw)
     except ValueError:
+        entry.delete(0, tk.END)
+        label.config(text="")
         sys_loop(["Invalid key\n\n"], label)
         return
 
     is_typing = True
-    entry.config(state="disabled")
     entry.delete(0, tk.END)
     label.config(text="")
 
@@ -80,8 +80,15 @@ def add_new_text(event=None):
 # Define the basic design of the gui and the entry field for the keys
 root = tk.Tk()
 root.title("Dictionary Terminal")
-root.geometry("1200x800")
 root.configure(bg="black")
+
+# Maximize the window (same as double-clicking the title bar)
+root.state('zoomed')
+
+# Get window dimensions for text wrapping
+root.update_idletasks()
+window_width = root.winfo_width()
+window_height = root.winfo_height()
 
 label = tk.Label(
     root,
@@ -89,7 +96,7 @@ label = tk.Label(
     fg="#eaa441",
     bg="black",
     font=("Courier New", 24),
-    wraplength=1150,
+    wraplength=window_width - 50,
     justify="left",
     anchor="nw"
 )
